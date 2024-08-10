@@ -115,8 +115,9 @@ class ScannerFragment : Fragment() {
     }
 
     private fun onSortButtonClick() {
-        beaconSet.sortedBy { it.distance }
-        (recyclerView.adapter as BeaconsAdapter).updateData(beaconSet.toList(),beaconTypePositionSelected)
+        beaconSet = HashSet()
+        beaconSet.addAll(beaconSet.sortedBy { it.rssi }.toList())
+        (recyclerView.adapter as BeaconsAdapter).updateData(beaconSet.sortedBy { it.rssi }.toList(),beaconTypePositionSelected)
     }
 
     private fun setUpBluetoothManager() {
@@ -192,6 +193,7 @@ class ScannerFragment : Fragment() {
                                 .sliceArray(20 until eddystoneUUID.toCharArray().size)
                         )
                         beacon.type = Beacon.beaconType.eddystoneUID
+                        beacon.uuid = Beacon.beaconType.eddystoneUID.toString()
                         beacon.namespace = namespace
                         beacon.instance = instance
                     }
@@ -214,7 +216,9 @@ class ScannerFragment : Fragment() {
                             )
                         ), 16
                     )
+
                     beacon.type = Beacon.beaconType.iBeacon
+                    beacon.namespace = Beacon.beaconType.iBeacon.name
                     beacon.uuid = iBeaconUUID
                     beacon.major = major
                     beacon.minor = minor
@@ -223,7 +227,7 @@ class ScannerFragment : Fragment() {
                 }
             }
             beaconSet.add(beacon)
-            (recyclerView.adapter as BeaconsAdapter).updateData(beaconSet.toList(),beaconTypePositionSelected)
+            (recyclerView.adapter as BeaconsAdapter).updateData(beaconSet.sortedBy { it.rssi }.reversed().toList(),beaconTypePositionSelected)
         }
 
         override fun onScanFailed(errorCode: Int) {
